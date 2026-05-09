@@ -1,0 +1,140 @@
+/**
+ * uni-app 全局样式变量
+ * 统一管理项目颜色、圆角、间距等设计系统
+ */
+
+/* ==================== 项目主题色 ==================== */
+
+/* 主色调 */
+$primary: #4A6FA5;           // 主蓝色
+$primary-light: #6B8FC5;    // 浅蓝
+$primary-dark: #3A5A8A;     // 深蓝
+
+/* 强调色 */
+$accent: #FFD100;            // 主题黄
+$accent-light: #FFE44D;      // 浅黄
+$accent-dark: #E6BB00;       // 深黄
+
+/* 功能色 */
+$success: #52C41A;           // 成功绿
+$warning: #FF8F00;           // 警示橙
+$danger: #FF4444;            // 危险红
+$info: #999999;              // 信息灰
+
+/* 文字颜色 */
+$text-primary: #333333;      // 主要文字
+$text-secondary: #666666;   // 次要文字
+$text-placeholder: #999999;  // 占位文字
+$text-disabled: #CCCCCC;     // 禁用文字
+
+/* 背景颜色 */
+$bg-white: #FFFFFF;
+$bg-gray: #F5F5F5;
+$bg-dark: #1A1A1A;          // 深色背景
+$bg-mask: rgba(0, 0, 0, 0.5); // 遮罩
+
+/* 边框颜色 */
+$border-light: #F0F0F0;
+$border-gray: #E5E5E5;
+$border-dark: #333333;
+
+/* 微信绿 */
+$wechat: #07C160;
+
+/* ==================== 圆角规范 ==================== */
+
+/*
+ * 圆角统一使用以下4个档位：
+ * - $radius-sm: 4px   - 小圆角（标签、小按钮）
+ * - $radius-base: 8px - 基础圆角（卡片、输入框）
+ * - $radius-lg: 12px  - 大圆角（弹窗、模态框）
+ * - $radius-xl: 16px  - 超大圆角（底部栏等）
+ */
+$radius-sm: 4px;
+$radius-base: 8px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-circle: 50%;
+
+/* ==================== 间距规范 ==================== */
+
+/*
+ * 间距使用8px基础网格：
+ * - $space-xs: 4px  - 紧凑间距
+ * - $space-sm: 8px  - 小间距
+ * - $space-md: 12px - 中等间距
+ * - $space-lg: 16px - 大间距
+ * - $space-xl: 20px - 特大间距
+ * - $space-xxl: 24px - 超大间距
+ */
+$space-xs: 4px;
+$space-sm: 8px;
+$space-md: 12px;
+$space-lg: 16px;
+$space-xl: 20px;
+$space-xxl: 24px;
+
+/* ==================== 字体大小规范 ==================== */
+
+/*
+ * 字体大小层级：
+ * - $font-xs: 11px  - 极小字（角标）
+ * - $font-sm: 12px  - 小字（辅助说明）
+ * - $font-base: 14px - 基础字（正文）
+ * - $font-md: 15px  - 中字（副标题）
+ * - $font-lg: 16px  - 大字（标题）
+ * - $font-xl: 18px  - 特大字（页面标题）
+ * - $font-xxl: 20px - 超大字（重要数字）
+ * - $font-xxxl: 24px - 最大字（价格等）
+ */
+$font-xs: 11px;
+$font-sm: 12px;
+$font-base: 14px;
+$font-md: 15px;
+$font-lg: 16px;
+$font-xl: 18px;
+$font-xxl: 20px;
+$font-xxxl: 24px;
+
+/* ==================== 阴影规范 ==================== */
+
+/*
+ * 阴影统一使用：
+ * - $shadow-sm: 小阴影（卡片hover）
+ * - $shadow-base: 基础阴影（卡片）
+ * - $shadow-lg: 大阴影（弹窗）
+ * - $shadow-bottom: 底部阴影（底部栏）
+ */
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-base: 0 2px 12px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.12);
+$shadow-bottom: 0 -2px 12px rgba(0, 0, 0, 0.08);
+$shadow-yellow: 0 4px 12px rgba(255, 209, 0, 0.25);
+
+/* ==================== 兼容旧的变量名 ==================== */
+
+/* 兼容原有变量 */
+$uni-color-primary: $primary;
+$uni-color-success: $success;
+$uni-color-warning: $warning;
+$uni-color-error: $danger;
+$uni-text-color: $text-primary;
+$uni-text-color-grey: $text-placeholder;
+$uni-bg-color: $bg-white;
+$uni-bg-color-grey: $bg-gray;
+$uni-border-color: $border-gray;
+$uni-border-radius-base: $radius-base;
+$uni-border-radius-lg: $radius-lg;
+$uni-font-size-sm: $font-sm;
+$uni-font-size-base: $font-base;
+$uni-font-size-lg: $font-lg;
+
+/* ==================== 状态颜色映射 ==================== */
+
+/* 活动状态颜色 */
+$status-registering: $success;     // 报名中
+$status-full: $warning;            // 已满员
+$status-ongoing: $primary;         // 进行中
+$status-completed: $info;           // 已结束
+$status-draft: #FFC107;             // 草稿（黄色）
+$status-scheduled: $primary;         // 预约（蓝色）

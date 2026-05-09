@@ -1,0 +1,372 @@
+/**
+ * 公共样式
+ * 统一管理通用组件样式
+ */
+
+@import '../uni.scss';
+
+/* ==================== 通用布局 ==================== */
+
+.page-container {
+  min-height: 100vh;
+  background-color: $bg-gray;
+}
+
+.content-wrapper {
+  padding: $space-lg;
+}
+
+/* ==================== 通用卡片 ==================== */
+
+.card {
+  background-color: $bg-white;
+  border-radius: $radius-base;
+  box-shadow: $shadow-base;
+  
+  &-header {
+    padding: $space-lg;
+    border-bottom: 1px solid $border-light;
+  }
+  
+  &-body {
+    padding: $space-lg;
+  }
+  
+  &-footer {
+    padding: $space-md $space-lg;
+    border-top: 1px solid $border-light;
+  }
+}
+
+/* ==================== 通用按钮 ==================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 $space-xl;
+  border-radius: $radius-base;
+  font-size: $font-base;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all $ANIMATION_DURATION ease;
+  
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+  
+  &-primary {
+    background-color: $primary;
+    color: #fff;
+  }
+  
+  &-accent {
+    background-color: $accent;
+    color: #000;
+  }
+  
+  &-success {
+    background-color: $success;
+    color: #fff;
+  }
+  
+  &-warning {
+    background-color: $warning;
+    color: #fff;
+  }
+  
+  &-danger {
+    background-color: $danger;
+    color: #fff;
+  }
+  
+  &-ghost {
+    background-color: transparent;
+    border: 1px solid $border-gray;
+    color: $text-primary;
+  }
+  
+  &-block {
+    width: 100%;
+  }
+  
+  &-sm {
+    height: 32px;
+    padding: 0 $space-md;
+    font-size: $font-sm;
+  }
+  
+  &-lg {
+    height: 50px;
+    padding: 0 $space-xxl;
+    font-size: $font-lg;
+  }
+}
+
+/* ==================== 状态标签 ==================== */
+
+.status-tag {
+  display: inline-block;
+  padding: 4px $space-sm;
+  border-radius: $radius-sm;
+  font-size: $font-xs;
+  font-weight: 500;
+  
+  &-registering {
+    background-color: rgba($success, 0.1);
+    color: $success;
+  }
+  
+  &-full {
+    background-color: rgba($warning, 0.1);
+    color: $warning;
+  }
+  
+  &-ongoing {
+    background-color: rgba($primary, 0.1);
+    color: $primary;
+  }
+  
+  &-completed {
+    background-color: rgba($info, 0.1);
+    color: $info;
+  }
+  
+  &-draft {
+    background-color: rgba(#FFC107, 0.1);
+    color: #F57C00;
+  }
+  
+  &-scheduled {
+    background-color: rgba($primary, 0.1);
+    color: $primary;
+  }
+  
+  &-pending {
+    background-color: rgba($warning, 0.1);
+    color: $warning;
+  }
+  
+  &-confirmed {
+    background-color: rgba($success, 0.1);
+    color: $success;
+  }
+  
+  &-cancelled {
+    background-color: rgba($danger, 0.1);
+    color: $danger;
+  }
+}
+
+/* ==================== 输入框 ==================== */
+
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 $space-lg;
+  background-color: $bg-gray;
+  border-radius: $radius-base;
+  font-size: $font-base;
+  color: $text-primary;
+  box-sizing: border-box;
+  
+  &::placeholder {
+    color: $text-placeholder;
+  }
+  
+  &-focus {
+    border: 1px solid $primary;
+  }
+}
+
+.textarea {
+  @extend .input;
+  height: auto;
+  min-height: 80px;
+  padding: $space-md $space-lg;
+  resize: vertical;
+}
+
+/* ==================== 列表项 ==================== */
+
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: $space-lg;
+  background-color: $bg-white;
+  border-bottom: 1px solid $border-light;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: $radius-sm;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  &-content {
+    flex: 1;
+    margin-left: $space-md;
+    overflow: hidden;
+  }
+  
+  &-title {
+    font-size: $font-base;
+    color: $text-primary;
+    font-weight: 500;
+    @include ellipsis;
+  }
+  
+  &-desc {
+    font-size: $font-sm;
+    color: $text-secondary;
+    margin-top: $space-xs;
+    @include ellipsis;
+  }
+}
+
+/* ==================== 空状态 ==================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  
+  &-icon {
+    font-size: 48px;
+    margin-bottom: $space-lg;
+  }
+  
+  &-text {
+    font-size: $font-base;
+    color: $text-placeholder;
+  }
+}
+
+/* ==================== 分割线 ==================== */
+
+.divider {
+  height: 1px;
+  background-color: $border-light;
+  margin: $space-lg 0;
+  
+  &-vertical {
+    width: 1px;
+    height: 100%;
+    margin: 0 $space-md;
+  }
+}
+
+/* ==================== 安全区域 ==================== */
+
+.safe-area-bottom {
+  padding-bottom: calc($space-lg + env(safe-area-inset-bottom));
+}
+
+.safe-area-top {
+  padding-top: calc($space-lg + env(safe-area-inset-top));
+}
+
+/* ==================== 文字省略 ==================== */
+
+@mixin ellipsis($line: 1) {
+  @if $line == 1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $line;
+    overflow: hidden;
+  }
+}
+
+.text-ellipsis {
+  @include ellipsis;
+}
+
+.text-ellipsis-2 {
+  @include ellipsis(2);
+}
+
+.text-ellipsis-3 {
+  @include ellipsis(3);
+}
+
+/* ==================== Flex工具类 ==================== */
+
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* ==================== 间距工具类 ==================== */
+
+.mt-sm { margin-top: $space-sm; }
+.mt-md { margin-top: $space-md; }
+.mt-lg { margin-top: $space-lg; }
+
+.mb-sm { margin-bottom: $space-sm; }
+.mb-md { margin-bottom: $space-md; }
+.mb-lg { margin-bottom: $space-lg; }
+
+.ml-sm { margin-left: $space-sm; }
+.ml-md { margin-left: $space-md; }
+.ml-lg { margin-left: $space-lg; }
+
+.mr-sm { margin-right: $space-sm; }
+.mr-md { margin-right: $space-md; }
+.mr-lg { margin-right: $space-lg; }
+
+.pt-sm { padding-top: $space-sm; }
+.pt-md { padding-top: $space-md; }
+.pt-lg { padding-top: $space-lg; }
+
+.pb-sm { padding-bottom: $space-sm; }
+.pb-md { padding-bottom: $space-md; }
+.pb-lg { padding-bottom: $space-lg; }
+
+/* ==================== 文字工具类 ==================== */
+
+.text-primary { color: $text-primary; }
+.text-secondary { color: $text-secondary; }
+.text-placeholder { color: $text-placeholder; }
+.text-success { color: $success; }
+.text-warning { color: $warning; }
+.text-danger { color: $danger; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
