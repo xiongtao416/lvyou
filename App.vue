@@ -1,0 +1,1 @@
+/workspace/outdoor-activity-v1/client/App.vue

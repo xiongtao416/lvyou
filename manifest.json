@@ -1,0 +1,70 @@
+{
+    "name": "户外探索",
+    "appid": "__UNI__OUTDOOR2025",
+    "description": "高校教职工户外活动报名小程序",
+    "versionName": "1.0.0",
+    "versionCode": 100,
+    "transformPx": false,
+    "app-plus": {
+        "usingComponents": true,
+        "nvueStyleCompiler": "uni-app",
+        "compilerVersion": 3,
+        "splashscreen": {
+            "alwaysShowBeforeRender": true,
+            "waiting": true,
+            "autoclose": true,
+            "delay": 0
+        },
+        "modules": {},
+        "distribute": {
+            "android": {
+                "permissions": [
+                    "<uses-permission android:name=\"android.permission.INTERNET\" />",
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />"
+                ]
+            },
+            "ios": {},
+            "sdkConfigs": {}
+        }
+    },
+    "quickapp": {},
+    "mp-weixin": {
+        "appid": "",
+        "setting": {
+            "urlCheck": false,
+            "es6": true,
+            "enhance": true,
+            "postcss": true,
+            "preloadBackgroundData": false,
+            "minified": true,
+            "newFeature": false,
+            "coverView": true,
+            "nodeModules": false,
+            "autoAudits": false,
+            "showShadowRootInWkwebview": true,
+            "uglifyFileName": false
+        },
+        "usingComponents": true,
+        "cloud": true,
+        "permission": {
+            "scope.userLocation": {
+                "desc": "获取位置信息用于显示集合地点"
+            }
+        },
+        "requiredBackgroundModes": [],
+        "lazyCodeLoading": "requiredComponents"
+    },
+    "mp-alipay": {
+        "usingComponents": true
+    },
+    "mp-baidu": {
+        "usingComponents": true
+    },
+    "mp-toutiao": {
+        "usingComponents": true
+    },
+    "uniStatistics": {
+        "enable": false
+    },
+    "vueVersion": "3"
+}

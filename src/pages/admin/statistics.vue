@@ -101,24 +101,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { statisticsApi } from '@/utils/http'
 
 const period = ref('7')
 
 const overview = ref({
-  activities: 12,
-  participants: 328,
-  views: 8960,
-  revenue: 58400
+  activities: 0,
+  participants: 0,
+  views: 0,
+  revenue: 0
 })
 
-const activityRanking = ref([
-  { title: '黄山日出两日游', cover: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=100&h=100&fit=crop', participants: 86, views: 2340, price: 299 },
-  { title: '武功山徒步穿越', cover: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=100&h=100&fit=crop', participants: 72, views: 1890, price: 388 },
-  { title: '九华山祈福一日', cover: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=100&h=100&fit=crop', participants: 58, views: 1560, price: 168 },
-  { title: '莫干山露营之夜', cover: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=100&h=100&fit=crop', participants: 45, views: 1230, price: 458 },
-  { title: '崇礼滑雪一日', cover: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=100&h=100&fit=crop', participants: 38, views: 980, price: 288 }
-])
+const activityRanking = ref<any[]>([])
 
 const trendData = computed(() => {
   if (period.value === '7') {
@@ -142,9 +137,57 @@ const trendTotal = computed(() => trendData.value.reduce((sum, i) => sum + i.val
 const trendGrowth = ref(18)
 
 const userStats = ref({
-  total: 1256,
-  newToday: 23,
-  active: 458
+  total: 0,
+  newToday: 0,
+  active: 0
+})
+
+const loadOverview = async () => {
+  try {
+    const res: any = await statisticsApi.getOverview()
+    if (res) {
+      overview.value = {
+        activities: res.activities || 0,
+        participants: res.participants || 0,
+        views: res.views || 0,
+        revenue: res.revenue || 0
+      }
+    }
+  } catch (e) {
+    console.error('获取概览数据失败', e)
+  }
+}
+
+const loadActivityRanking = async () => {
+  try {
+    const res: any = await statisticsApi.getActivityRanking()
+    if (res) {
+      activityRanking.value = Array.isArray(res) ? res : (res.list || [])
+    }
+  } catch (e) {
+    console.error('获取活动排行失败', e)
+  }
+}
+
+const loadUserStats = async () => {
+  try {
+    const res: any = await statisticsApi.getUserStats()
+    if (res) {
+      userStats.value = {
+        total: res.total || 0,
+        newToday: res.newToday || 0,
+        active: res.active || 0
+      }
+    }
+  } catch (e) {
+    console.error('获取用户统计失败', e)
+  }
+}
+
+onMounted(() => {
+  loadOverview()
+  loadActivityRanking()
+  loadUserStats()
 })
 </script>
 

@@ -52,22 +52,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { userApi } from '@/utils/http'
 
-const adminList = ref([
-  {
-    name: '张老师',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    role: '超级管理员',
-    status: 'active'
-  },
-  {
-    name: '李老师',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-    role: '活动组织者',
-    status: 'active'
+const adminList = ref<any[]>([])
+
+const loadAdminList = async () => {
+  try {
+    const res: any = await userApi.getAdminList()
+    if (res) {
+      adminList.value = Array.isArray(res) ? res : (res.list || [])
+    }
+  } catch (e) {
+    console.error('获取管理员列表失败', e)
   }
-])
+}
+
+onMounted(() => {
+  loadAdminList()
+})
 
 // 显示添加弹窗
 const showAddModal = () => {

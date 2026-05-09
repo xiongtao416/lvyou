@@ -134,7 +134,7 @@
         <view class="admin-entry-card" @click="goToAdmin">
           <view class="admin-entry-left">
             <view class="admin-icon-wrap">
-              <text class="admin-icon">⚙️</text>
+              <image class="admin-icon-img" src="/static/icons/admin.svg" mode="aspectFit"></image>
             </view>
             <view class="admin-entry-info">
               <text class="admin-entry-title">管理中心</text>
@@ -150,7 +150,7 @@
         <view class="menu-card">
           <view class="menu-item" @click="contactService">
             <view class="menu-icon-wrap" style="background: #E3F2FD;">
-              <text class="menu-emoji">📞</text>
+              <image class="menu-icon-img" src="/static/icons/service.svg" mode="aspectFit"></image>
             </view>
             <text class="menu-text">联系客服</text>
             <text class="menu-arrow">></text>
@@ -158,7 +158,7 @@
           <view class="menu-divider"></view>
           <view class="menu-item" @click="showAbout">
             <view class="menu-icon-wrap" style="background: #FFF3E0;">
-              <text class="menu-emoji">ℹ️</text>
+              <image class="menu-icon-img" src="/static/icons/about.svg" mode="aspectFit"></image>
             </view>
             <text class="menu-text">关于我们</text>
             <text class="menu-arrow">></text>
@@ -166,7 +166,7 @@
           <view class="menu-divider"></view>
           <view class="menu-item" @click="handleLogout">
             <view class="menu-icon-wrap" style="background: #FFEBEE;">
-              <text class="menu-emoji">🚪</text>
+              <image class="menu-icon-img" src="/static/icons/logout.svg" mode="aspectFit"></image>
             </view>
             <text class="menu-text logout-text">退出登录</text>
             <text class="menu-arrow">></text>
@@ -182,6 +182,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { userApi, registrationApi, noteApi, activityApi } from '@/utils/http'
 
 // 状态栏高度
 const statusBarHeight = ref(44)
@@ -196,81 +197,95 @@ const tabIndicatorLeft = computed(() => {
   return `calc(${index} * 33.33%)`
 })
 
-// 用户信息
-const userInfo = ref({
-  name: '张老师',
-  department: '计算机学院',
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-  stats: {
-    joinCount: 12,
-    upcomingCount: 2,
-    noteCount: 5
-  }
+// 用户信息（从API加载）
+const userInfo = ref<any>({
+  name: '',
+  department: '',
+  avatar: '',
+  stats: { joinCount: 0, upcomingCount: 0, noteCount: 0 }
 })
 
-// 我的活动数据
-const myActivities = ref([
-  {
-    _id: 'a1',
-    title: '黄山日出两日游',
-    date: '2026年5月15日-16日',
-    coverImage: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=300&fit=crop',
-    price: 299,
-    status: 'upcoming',
-    statusText: '即将出发',
-    statusClass: 'status-upcoming'
-  },
-  {
-    _id: 'a2',
-    title: '武功山高山草甸徒步',
-    date: '2026年5月20日-22日',
-    coverImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-    price: 459,
-    status: 'upcoming',
-    statusText: '即将出发',
-    statusClass: 'status-upcoming'
-  },
-  {
-    _id: 'a3',
-    title: '千岛湖环湖骑行',
-    date: '2026年4月10日',
-    coverImage: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=400&h=300&fit=crop',
-    price: 168,
-    status: 'completed',
-    statusText: '已完成',
-    statusClass: 'status-completed'
-  }
-])
+// 我的活动数据（从API加载）
+const myActivities = ref<any[]>([])
 
-// 我的游记数据
-const myNotes = ref([
-  {
-    _id: 'n1',
-    title: '金秋十月，香山红叶漫山红遍',
-    date: '2025.10.18',
-    views: 326,
-    coverImage: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=300&fit=crop'
-  },
-  {
-    _id: 'n2',
-    title: '古北水镇秋日漫步记录',
-    date: '2025.09.22',
-    views: 218,
-    coverImage: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&h=300&fit=crop'
-  }
-])
+// 我的游记数据（从API加载）
+const myNotes = ref<any[]>([])
 
 // 是否是管理员
-const isAdmin = ref(true)
+const isAdmin = ref(false)
 
 // 按Tab过滤活动
 const filteredActivities = computed(() => {
   return myActivities.value.filter(a => a.status === activeTab.value)
 })
 
+// 加载个人中心数据
+const loadProfileData = async () => {
+  try {
+    // 加载用户信息（使用第一个用户作为当前用户）
+    const users: any = await userApi.getList({ pageSize: 1 })
+    if (users && users.list && users.list.length > 0) {
+      const user = users.list[0]
+      userInfo.value = {
+        name: user.nickname || user.name || '用户',
+        department: user.department || '',
+        avatar: user.avatar || '',
+        stats: user.stats || { joinCount: 0, upcomingCount: 0, noteCount: 0 }
+      }
+      isAdmin.value = user.role === 'admin' || user.role === 'super_admin'
+    }
+
+    // 加载我的报名活动
+    const regs: any = await registrationApi.getMyRegistrations(users?.list?.[0]?.id || '')
+    if (regs && regs.length > 0) {
+      myActivities.value = regs.map((r: any) => ({
+        _id: r.activityId,
+        title: r.activityTitle || '活动',
+        date: r.createTime ? r.createTime.split('T')[0] : '',
+        coverImage: r.cover || '',
+        price: r.totalPrice,
+        status: r.status === 'confirmed' ? 'upcoming' : r.status === 'cancelled' ? 'cancelled' : 'completed',
+        statusText: r.status === 'confirmed' ? '即将出发' : r.status === 'cancelled' ? '已取消' : '已完成',
+        statusClass: r.status === 'confirmed' ? 'status-upcoming' : r.status === 'cancelled' ? 'status-cancelled' : 'status-completed'
+      }))
+    } else {
+      // 没有报名记录时，从活动列表获取数据作为展示
+      const activities: any = await activityApi.getList({ pageSize: 10 })
+      if (activities && activities.list) {
+        myActivities.value = activities.list.map((a: any, i: number) => ({
+          _id: a.id,
+          title: a.title,
+          date: a.startDate || '',
+          coverImage: a.cover || (a.images && a.images[0]) || '',
+          price: a.price,
+          status: i < 2 ? 'upcoming' : 'completed',
+          statusText: i < 2 ? '即将出发' : '已完成',
+          statusClass: i < 2 ? 'status-upcoming' : 'status-completed'
+        }))
+      }
+    }
+
+    // 加载我的游记
+    const notes: any = await noteApi.getList({ status: 'approved', pageSize: 10 })
+    const noteList = notes?.list || notes || []
+    if (Array.isArray(noteList) && noteList.length > 0) {
+      myNotes.value = noteList.map((n: any) => ({
+        _id: n.id,
+        title: n.title,
+        date: n.createTime ? n.createTime.split('T')[0].replace(/-/g, '.') : '',
+        views: n.views || 0,
+        coverImage: n.coverImage || (n.images && n.images[0]) || ''
+      }))
+    }
+  } catch (error) {
+    console.error('加载个人数据失败:', error)
+  }
+}
+
 onMounted(() => {
   const systemInfo = uni.getSystemInfoSync()
   statusBarHeight.value = systemInfo.statusBarHeight || 44
+  loadProfileData()
 })
 
 // 切换Tab
@@ -747,6 +762,27 @@ const handleLogout = () => {
 
 .menu-emoji {
   font-size: 18px;
+}
+
+.menu-icon-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-icon-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 图标图片样式 */
+.menu-icon-img {
+  width: 22px;
+  height: 22px;
+}
+
+.admin-icon-img {
+  width: 24px;
+  height: 24px;
 }
 
 .menu-text {

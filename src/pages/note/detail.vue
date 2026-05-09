@@ -119,9 +119,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { noteApi } from '@/utils/http'
+import { getRouteParam } from '@/utils/route'
 
 const isLiked = ref(false)
 const isFavorited = ref(false)
+const loading = ref(false)
 
 const note = ref<any>({
   coverImage: '',
@@ -141,35 +144,47 @@ onMounted(() => {
   loadNoteDetail()
 })
 
-// 模拟游记数据
-const mockNoteData = {
-  coverImage: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&h=600&fit=crop',
-  title: '武功山三日徒步穿越：云海之上，星空之下',
-  author: {
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    name: '山野旅人'
-  },
-  publishDate: '2026-04-15',
-  viewCount: 3862,
-  content: [
-    '四月的武功山，草甸刚刚返青，漫山遍野的绿意与蓝天白云交相辉映。我们从萍乡出发，沿着经典的徒步路线，用三天时间完成了这次穿越之旅。一路上，云海翻涌，日出壮丽，星空璀璨，每一步都是对自然的敬畏与感动。',
-    '第二天清晨五点，我们在帐篷中被冻醒，裹着睡袋爬出帐篷的那一刻，眼前的景象让所有人都屏住了呼吸。云海从山谷中翻涌而上，远处的山峰在云层中若隐若现，第一缕阳光穿透云层，将整个天空染成了金色。那一刻，所有的疲惫都烟消云散了。',
-    '中午时分，我们沿着山脊线继续前行。武功山的高山草甸在春季呈现出最美的状态，嫩绿的草丛中点缀着不知名的野花。远处是连绵起伏的山峦，近处是随风摇曳的草浪，仿佛置身于一幅巨大的油画之中。途中遇到几位同样徒步的驴友，大家互相加油打气，分享着路上的见闻。',
-    '第三天下午，我们终于到达了终点。回望身后的武功山，那片广袤的草甸、那片翻涌的云海、那片璀璨的星空，都将成为记忆中最珍贵的画面。这次徒步让我深刻体会到，最美的风景永远在路上，而最真实的自己，也只有在山野之间才能找到。如果你也想逃离城市的喧嚣，来武功山走一走吧，你一定会爱上这里。'
-  ],
-  images: [
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600&h=400&fit=crop'
-  ],
-  tags: ['武功山', '徒步', '云海', '户外', '露营'],
-  likeCount: 326,
-  favoriteCount: 158,
-  commentCount: 42
-}
+// 从API加载游记详情
+const loadNoteDetail = async () => {
+  loading.value = true
+  try {
+    const id = getRouteParam('id')
+    let data: any = null
 
-const loadNoteDetail = () => {
-  note.value = { ...mockNoteData }
+    if (id) {
+      // 有ID时，通过详情接口获取
+      data = await noteApi.getById(id)
+    } else {
+      // 没有ID时，获取列表第一条
+      const res: any = await noteApi.getList({ status: 'approved', pageSize: 1 })
+      const list = res?.list || (Array.isArray(res) ? res : [])
+      if (list.length > 0) data = list[0]
+    }
+
+    if (data) {
+      note.value = {
+        coverImage: data.coverImage || (data.images && data.images[0]) || '',
+        title: data.title,
+        author: {
+          avatar: data.authorAvatar,
+          name: data.authorName
+        },
+        publishDate: data.createTime ? data.createTime.split('T')[0] : '',
+        viewCount: data.views || 0,
+        content: data.content ? data.content.split('\n\n') : [],
+        images: data.images || [],
+        tags: data.tags || [],
+        likeCount: data.likes || 0,
+        favoriteCount: data.favorites || 0,
+        commentCount: data.commentCount || 0
+      }
+    }
+  } catch (error) {
+    console.error('加载游记失败:', error)
+    uni.showToast({ title: '加载失败', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
 }
 
 // 返回

@@ -1,5 +1,17 @@
 <template>
   <view class="admin-page">
+    <!-- 自定义导航栏 -->
+    <view class="custom-navbar" :style="{ paddingTop: statusBarHeight + 'px' }">
+      <view class="navbar-content">
+        <view class="navbar-back" @click="goBack">←</view>
+        <text class="navbar-title">管理中心</text>
+        <view class="navbar-right"></view>
+      </view>
+    </view>
+    
+    <!-- 占位 -->
+    <view :style="{ height: (statusBarHeight + 44) + 'px' }"></view>
+
     <!-- 管理员信息卡片 -->
     <view class="admin-card">
       <view class="admin-header">
@@ -92,20 +104,66 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { userApi, statisticsApi } from '@/utils/http'
+
+const statusBarHeight = ref(44)
 
 const adminInfo = ref({
-  name: '张老师',
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-  role: '活动组织者',
-  isSuperAdmin: true
+  name: '',
+  avatar: '',
+  role: '',
+  isSuperAdmin: false
 })
 
 const stats = ref({
-  published: 12,
-  participants: 156,
-  views: 3280
+  published: 0,
+  participants: 0,
+  views: 0
 })
+
+const loadAdminInfo = async () => {
+  try {
+    const res: any = await userApi.getList({ pageSize: 1 })
+    if (res && res.list && res.list.length > 0) {
+      const user = res.list[0]
+      adminInfo.value = {
+        name: user.name || '',
+        avatar: user.avatar || '',
+        role: user.role || '',
+        isSuperAdmin: user.isSuperAdmin || false
+      }
+    }
+  } catch (e) {
+    console.error('获取管理员信息失败', e)
+  }
+}
+
+const loadStats = async () => {
+  try {
+    const res: any = await statisticsApi.getOverview()
+    if (res) {
+      stats.value = {
+        published: res.activities || 0,
+        participants: res.participants || 0,
+        views: res.views || 0
+      }
+    }
+  } catch (e) {
+    console.error('获取统计数据失败', e)
+  }
+}
+
+onMounted(() => {
+  const systemInfo = uni.getSystemInfoSync()
+  statusBarHeight.value = systemInfo.statusBarHeight || 44
+  loadAdminInfo()
+  loadStats()
+})
+
+const goBack = () => {
+  uni.navigateBack()
+}
 
 const goToPublish = () => {
   uni.navigateTo({ url: '/pages/admin/publish' })
@@ -137,6 +195,45 @@ const goToSettings = () => {
   min-height: 100vh;
   background: #f5f5f5;
   padding-bottom: 30px;
+}
+
+/* 自定义导航栏 */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  z-index: 100;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 12px;
+}
+
+.navbar-back {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #333;
+}
+
+.navbar-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+}
+
+.navbar-right {
+  width: 32px;
 }
 
 .admin-card {
