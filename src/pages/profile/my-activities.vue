@@ -108,54 +108,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { activityApi } from '@/utils/http'
+import { formatDate } from '@/utils/format'
 
 const currentTab = ref(0)
 const tabs = ['即将出发', '已完成', '已取消']
+const loading = ref(false)
 
-// 模拟活动数据
-const upcomingList = ref([
-  {
-    id: '1',
-    title: '黄山日出两日游｜观云海赏奇松',
-    date: '2026-05-15',
-    location: '黄山风景区',
-    price: 299,
-    statusText: '即将出发',
-    statusClass: 'upcoming',
-    coverImage: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=200&h=200&fit=crop'
-  },
-  {
-    id: '2',
-    title: '九华山祈福一日游｜登顶百岁宫',
-    date: '2026-05-20',
-    location: '池州九华山',
-    price: 168,
-    statusText: '报名中',
-    statusClass: 'registering',
-    coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&h=200&fit=crop'
+// 活动数据从API加载
+const allActivities = ref<any[]>([])
+
+const upcomingList = computed(() => allActivities.value.filter(a => a.status === 'registering' || a.status === 'upcoming'))
+const completedList = computed(() => allActivities.value.filter(a => a.status === 'completed'))
+const cancelledList = computed(() => allActivities.value.filter(a => a.status === 'cancelled'))
+
+// 加载活动列表
+const loadActivities = async () => {
+  loading.value = true
+  try {
+    const res: any = await activityApi.getList({ pageSize: 20 })
+    const list = res?.list || (Array.isArray(res) ? res : [])
+    allActivities.value = list.map((a: any) => ({
+      id: a.id,
+      title: a.title,
+      date: formatDate(a.startDate),
+      location: a.location,
+      price: a.price,
+      statusText: a.statusText || a.status === 'registering' ? '即将出发' : a.status === 'completed' ? '已完成' : '已取消',
+      statusClass: a.status === 'registering' ? 'upcoming' : a.status,
+      coverImage: a.cover || (a.images && a.images[0]) || ''
+    }))
+  } catch (error) {
+    console.error('加载活动失败:', error)
+  } finally {
+    loading.value = false
   }
-])
-
-const completedList = ref([
-  {
-    id: '3',
-    title: '武功山徒步穿越｜云海草甸',
-    date: '2026-04-10',
-    location: '江西萍乡武功山',
-    price: 388,
-    statusText: '已完成',
-    statusClass: 'completed',
-    coverImage: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=200&h=200&fit=crop'
-  }
-])
-
-const cancelledList = ref<any[]>([])
+}
 
 // 切换Tab
 const switchTab = (index: number) => {
   currentTab.value = index
 }
+
+onMounted(() => {
+  loadActivities()
+})
 
 // 跳转详情
 const goDetail = (id: string) => {

@@ -1,6 +1,8 @@
 // 日期格式化
 export const formatDate = (date: string | Date, format = 'YYYY-MM-DD'): string => {
+  if (!date) return ''
   const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
   const year = d.getFullYear()
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
@@ -13,6 +15,14 @@ export const formatDate = (date: string | Date, format = 'YYYY-MM-DD'): string =
     .replace('DD', day)
     .replace('HH', hour)
     .replace('mm', minute)
+}
+
+// 短日期格式（M月D日）
+export const formatDateShort = (date: string | Date): string => {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  return `${d.getMonth() + 1}月${d.getDate()}日`
 }
 
 // 获取星期几

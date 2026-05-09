@@ -162,19 +162,16 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { getRouteParam } from '@/utils/route'
+import { activityApi, registrationApi } from '@/utils/http'
+import { formatDate } from '@/utils/format'
+import type { Activity } from '@/types'
 
-// 本地日期格式化
-const formatDate = (date: string) => {
-  if (!date) return '待定'
-  const d = new Date(date)
-  if (isNaN(d.getTime())) return '待定'
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-const activity = ref<any>({})
-const userInfo = ref<any>({})
+const activity = ref<Partial<Activity>>({})
+const userInfo = ref<any>(({ isProfileComplete: false }))
 const submitting = ref(false)
 const agreed = ref(false)
+const loading = ref(false)
 
 const form = ref({
   realName: '',
@@ -192,67 +189,27 @@ const totalPrice = computed(() => {
 })
 
 onMounted(() => {
-  // 兼容多种获取参数方式
-  let id = ''
-  try {
-    const pages = getCurrentPages()
-    const currentPage = pages[pages.length - 1] as any
-    id = currentPage.$page?.options?.id || currentPage.options?.id || ''
-  } catch (e) {
-    // H5环境从URL获取
-    const hash = window.location.hash
-    const match = hash.match(/id=([^&]*)/)
-    if (match) id = match[1]
-  }
+  // 使用统一工具获取路由参数
+  const id = getRouteParam('id')
 
   if (id) {
     loadActivity(id)
-  } else {
-    // 没有id时使用默认数据
-    loadActivity('1')
   }
-  loadUserInfo()
+  // 用户信息暂时用空值，后期从API获取
 })
 
-// 模拟活动数据
-const mockActivityData: Record<string, any> = {
-  '1': {
-    _id: '1',
-    title: '黄山日出两日游｜观云海赏奇松',
-    coverImage: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=200&h=200&fit=crop',
-    startDate: '2026-05-15',
-    startTime: '07:30',
-    location: '黄山风景区',
-    price: 299
-  },
-  '2': {
-    _id: '2',
-    title: '九华山祈福一日游｜登顶百岁宫',
-    coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&h=200&fit=crop',
-    startDate: '2026-05-20',
-    startTime: '08:00',
-    location: '池州九华山',
-    price: 168
+// 从 API 加载活动信息
+const loadActivity = async (id: string) => {
+  loading.value = true
+  try {
+    const res: any = await activityApi.getById(id)
+    activity.value = res
+  } catch (error) {
+    console.error('加载活动失败:', error)
+    uni.showToast({ title: '加载失败', icon: 'none' })
+  } finally {
+    loading.value = false
   }
-}
-
-// 模拟用户数据
-const mockUserInfo = {
-  isProfileComplete: false,
-  realName: '',
-  phone: '',
-  department: '',
-  idCard: ''
-}
-
-// 加载活动信息 - 演示模式（同步设置，避免NaN）
-const loadActivity = (id: string) => {
-  activity.value = mockActivityData[id] || mockActivityData['1']
-}
-
-// 加载用户信息 - 演示模式
-const loadUserInfo = () => {
-  userInfo.value = mockUserInfo
 }
 
 // 增加人数
@@ -306,14 +263,24 @@ const handleSubmit = async () => {
 
   submitting.value = true
 
-  // 演示模式：模拟提交成功
-  setTimeout(() => {
-    uni.showToast({ title: '报名成功（演示模式）', icon: 'success' })
+  try {
+    await registrationApi.create({
+      activityId: activity.value.id,
+      userName: form.value.realName,
+      userPhone: form.value.phone,
+      department: form.value.department,
+      userCount: form.value.count,
+      remark: form.value.remark
+    })
+    uni.showToast({ title: '报名成功', icon: 'success' })
     submitting.value = false
     setTimeout(() => {
       uni.redirectTo({ url: '/pages/profile/my-activities' })
     }, 1500)
-  }, 1000)
+  } catch (error) {
+    submitting.value = false
+    // 错误已在http.ts中统一处理
+  }
 }
 </script>
 

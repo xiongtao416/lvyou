@@ -272,56 +272,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { activityApi } from '@/utils/http'
 
 const currentTab = ref(0)
 const searchKeyword = ref('')
 const filterMonth = ref('')
 
 // 统一活动数据
-const activities = ref([
-  {
-    id: '1', title: '黄山日出两日游｜观云海赏奇松',
-    cover: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=300&fit=crop',
-    date: '2026-05-15', location: '黄山风景区',
-    participants: 28, views: 856, price: 299, maxParticipants: 50,
-    description: '登顶光明顶，观赏壮丽的日出云海',
-    status: 'registering', saveTime: ''
-  },
-  {
-    id: '2', title: '武功山徒步穿越｜云中草原',
-    cover: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop',
-    date: '2026-05-20', location: '江西武功山',
-    participants: 45, views: 1230, price: 388, maxParticipants: 60,
-    description: '穿越云中草原，感受高山草甸',
-    status: 'registering', saveTime: ''
-  },
-  {
-    id: '3', title: '九华山祈福一日游',
-    cover: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=400&h=300&fit=crop',
-    date: '2026-04-10', location: '池州九华山',
-    participants: 52, views: 980, price: 168, maxParticipants: 40,
-    description: '登顶祈福，感受佛教文化',
-    status: 'completed', saveTime: ''
-  },
-  {
-    id: 'd1', title: '莫干山露营之夜',
-    cover: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400&h=300&fit=crop',
-    date: '', location: '',
-    participants: 0, views: 0, price: 0, maxParticipants: 0,
-    description: '',
-    status: 'draft', saveTime: '2026-05-06 14:30'
-  },
-  {
-    id: 's1', title: '崇礼滑雪一日游',
-    cover: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop',
-    date: '2026-06-01', location: '河北崇礼',
-    participants: 0, views: 0, price: 288, maxParticipants: 30,
-    description: '畅滑崇礼，体验冰雪乐趣',
-    scheduledDate: '2026-05-20 09:00',
-    status: 'scheduled', saveTime: ''
+const activities = ref<any[]>([])
+
+const loadActivities = async () => {
+  try {
+    const res: any = await activityApi.getList()
+    if (res) {
+      activities.value = Array.isArray(res) ? res : (res.list || [])
+    }
+  } catch (e) {
+    console.error('获取活动列表失败', e)
   }
-])
+}
+
+onMounted(() => {
+  loadActivities()
+})
 
 // 筛选后的列表
 const filteredActivities = computed(() => {

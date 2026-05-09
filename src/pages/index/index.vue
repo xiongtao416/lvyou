@@ -22,7 +22,7 @@
           indicator-active-color="#FFD000"
         >
           <swiper-item v-for="(banner, index) in banners" :key="index">
-            <view class="banner-item" @click="goToDetail(banner.id)">
+            <view class="banner-item" @click="goToDetail(banner.activityId || '')">
               <image class="banner-image" :src="banner.image" mode="aspectFill" />
               <view class="banner-badge" v-if="banner.badge">
                 <text class="badge-text">{{ banner.badge }}</text>
@@ -154,124 +154,102 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { homeApi, noteApi } from '@/utils/http'
+import { formatDateShort } from '@/utils/format'
+import type { Banner, NavItem } from '@/types'
 
 // 状态栏高度
 const statusBarHeight = ref(44)
+const loading = ref(false)
 
-// Banner数据
-const banners = ref([
-  {
-    id: '1',
-    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&h=400&fit=crop',
-    title: '黄山日出两日游',
-    subtitle: '观云海赏奇松，登顶光明顶',
-    badge: '热门'
-  },
-  {
-    id: '2',
-    image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&h=400&fit=crop',
-    title: '星空露营之夜',
-    subtitle: '篝火晚会，仰望银河',
-    badge: '限时'
-  },
-  {
-    id: '3',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=400&fit=crop',
-    title: '雪山徒步挑战赛',
-    subtitle: '征服高峰，遇见更好的自己',
-    badge: '热门'
-  }
-])
+// 从 API 加载所有数据
+const banners = ref<Banner[]>([])
+const navItems = ref<NavItem[]>([])
+const currentActivities = ref<any[]>([])
+const pastActivities = ref<any[]>([])
 
-// 金刚区导航 - 4个核心分类
-const navItems = ref([
-  { label: '徒步登山', icon: '徒', bgColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', category: 'hiking' },
-  { label: '露营野炊', icon: '营', bgColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', category: 'camping' },
-  { label: '亲子活动', icon: '亲', bgColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', category: 'family' },
-  { label: '特价优惠', icon: '惠', bgColor: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', category: 'discount' }
-])
-
-// 当前活动
-const currentActivities = ref([
-  {
-    _id: '1',
-    title: '黄山日出两日游 | 观云海赏奇松',
-    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=300&fit=crop',
-    typeTag: '徒步·2天',
-    location: '黄山风景区',
-    date: '5月15日-16日',
-    price: 299,
-    participantCount: 28,
-    participants: [
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-      'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop'
-    ]
-  },
-  {
-    _id: '2',
-    title: '武功山高山草甸徒步',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-    typeTag: '徒步·3天',
-    location: '江西萍乡武功山',
-    date: '5月20日-22日',
-    price: 459,
-    participantCount: 35,
-    participants: [
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop'
-    ]
-  },
-  {
-    _id: '3',
-    title: '千岛湖环湖骑行之旅',
-    image: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=400&h=300&fit=crop',
-    typeTag: '骑行·1天',
-    location: '杭州千岛湖',
-    date: '5月25日',
-    price: 168,
-    participantCount: 22,
-    participants: [
-      'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop',
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'
-    ]
-  }
-])
-
-// 往期活动
-const pastActivities = ref([
-  {
-    _id: 'p1',
-    title: '香山红叶观赏之旅',
-    activityDate: '2025.10.15',
-    coverImage: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop',
-    noteId: 'n1'
-  },
-  {
-    _id: 'p2',
-    title: '古北水镇秋日漫步',
-    activityDate: '2025.09.20',
-    coverImage: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=300&h=200&fit=crop',
-    noteId: 'n2'
-  }
-])
-
-// 精选游记
-const featuredNote = ref({
-  _id: 'n1',
-  title: '金秋十月，香山红叶漫山红遍',
-  coverImage: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&h=400&fit=crop',
-  author: {
-    name: '张老师',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'
-  },
-  participantCount: 32
+// 精选游记（从API加载）
+const featuredNote = ref<any>({
+  _id: '',
+  title: '',
+  coverImage: '',
+  author: { name: '', avatar: '' },
+  participantCount: 0
 })
 
 onMounted(() => {
   const systemInfo = uni.getSystemInfoSync()
   statusBarHeight.value = systemInfo.statusBarHeight || 44
+  
+  // 加载首页数据
+  loadHomeData()
 })
+
+// 加载首页数据
+const loadHomeData = async () => {
+  loading.value = true
+  try {
+    // 获取首页所有数据
+    const res: any = await homeApi.getHomeData()
+    
+    banners.value = res.banners || []
+    navItems.value = (res.navItems || []).slice(0, 4)
+    
+    // 转换热门活动数据格式
+    currentActivities.value = (res.hotActivities || []).map((item: any) => {
+      // participants 从对象数组转为头像字符串数组
+      const avatars = (item.participants || []).map((p: any) => p.avatar || p).filter(Boolean)
+      // 取第一张图片作为封面
+      const coverImg = item.cover || (Array.isArray(item.images) ? item.images[0] : '')
+      return {
+        _id: item.id,
+        title: item.title,
+        image: coverImg,
+        typeTag: Array.isArray(item.tags) ? item.tags.join('·') : '活动',
+        location: item.location,
+        date: formatDateShort(item.startDate),
+        price: item.price,
+        participantCount: item.participantCount,
+        participants: avatars
+      }
+    })
+    
+    // 转换往期活动数据格式
+    pastActivities.value = (res.pastActivities || []).map((item: any) => ({
+      _id: item.id,
+      title: item.title,
+      coverImage: item.cover || (Array.isArray(item.images) ? item.images[0] : ''),
+      activityDate: item.startDate,
+      noteId: item.id
+    }))
+    
+    // 加载精选游记（取第一条游记）
+    try {
+      const noteRes: any = await noteApi.getList({ status: 'approved', pageSize: 1 })
+      const noteList = noteRes?.list || (Array.isArray(noteRes) ? noteRes : [])
+      if (noteList.length > 0) {
+        const n = noteList[0]
+        featuredNote.value = {
+          _id: n.id,
+          title: n.title,
+          coverImage: n.coverImage || (n.images && n.images[0]) || '',
+          author: {
+            name: n.authorName || '',
+            avatar: n.authorAvatar || ''
+          },
+          participantCount: n.views || 0
+        }
+      }
+    } catch (e) {
+      // 游记加载失败不影响首页
+    }
+  } catch (error) {
+    console.error('加载首页数据失败:', error)
+    uni.showToast({ title: '加载失败', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
 
 // 导航点击
 const handleNavClick = (item: any) => {

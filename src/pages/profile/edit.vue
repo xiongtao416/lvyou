@@ -54,17 +54,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { userApi } from '@/utils/http'
 
-const userInfo = ref({
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop',
-  nickName: '张老师',
-  realName: '张明远',
-  phone: '13812345678',
-  department: '计算机学院',
+const userInfo = ref<any>({
+  avatar: '',
+  nickName: '',
+  realName: '',
+  phone: '',
+  department: '',
   idCard: '',
-  bio: '热爱户外运动，喜欢徒步和摄影。'
+  bio: ''
 })
+const saving = ref(false)
+
+// 加载用户信息
+const loadUserInfo = async () => {
+  try {
+    const res: any = await userApi.getList({ pageSize: 1 })
+    const list = res?.list || (Array.isArray(res) ? res : [])
+    if (list.length > 0) {
+      const user = list[0]
+      userInfo.value = {
+        avatar: user.avatar || '',
+        nickName: user.nickname || '',
+        realName: user.name || '',
+        phone: user.phone || '',
+        department: user.department || '',
+        idCard: user.idCard || '',
+        bio: user.bio || ''
+      }
+    }
+  } catch (error) {
+    console.error('加载用户信息失败:', error)
+  }
+}
 
 // 更换头像
 const changeAvatar = () => {
@@ -79,7 +103,7 @@ const changeAvatar = () => {
 }
 
 // 保存
-const handleSave = () => {
+const handleSave = async () => {
   if (!userInfo.value.realName.trim()) {
     uni.showToast({ title: '请输入真实姓名', icon: 'none' })
     return
@@ -89,12 +113,39 @@ const handleSave = () => {
     return
   }
 
-  uni.showToast({ title: '保存成功', icon: 'success' })
-  uni.setStorageSync('userInfo', userInfo.value)
-  setTimeout(() => {
-    uni.navigateBack()
-  }, 1500)
+  saving.value = true
+  try {
+    const res: any = await userApi.getList({ pageSize: 1 })
+    const list = res?.list || (Array.isArray(res) ? res : [])
+    if (list.length > 0) {
+      const userId = list[0].id
+      await userApi.update(userId, {
+        nickname: userInfo.value.nickName,
+        name: userInfo.value.realName,
+        phone: userInfo.value.phone,
+        department: userInfo.value.department,
+        idCard: userInfo.value.idCard,
+        bio: userInfo.value.bio,
+        avatar: userInfo.value.avatar
+      })
+    }
+    // 同时更新本地缓存
+    uni.setStorageSync('userInfo', userInfo.value)
+    uni.showToast({ title: '保存成功', icon: 'success' })
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 1500)
+  } catch (error) {
+    console.error('保存失败:', error)
+    // 错误已在http.ts中统一处理
+  } finally {
+    saving.value = false
+  }
 }
+
+onMounted(() => {
+  loadUserInfo()
+})
 </script>
 
 <style lang="scss" scoped>

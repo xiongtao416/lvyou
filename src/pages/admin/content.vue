@@ -91,54 +91,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { noteApi } from '@/utils/http'
 
 const currentTab = ref(0)
 const tabs = ['游记审核', '评论管理']
-const pendingNotes = ref(3)
+const pendingNotes = ref(0)
 const pendingComments = ref(5)
 
-const notes = ref([
-  {
-    title: '黄山之行｜日出云海美哭了',
-    cover: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=200&h=200&fit=crop',
-    authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    authorName: '驴友小明',
-    date: '2026-05-07',
-    views: 1234,
-    likes: 89,
-    comments: 23,
-    status: 'pending',
-    statusText: '待审核',
-    statusClass: 'pending'
-  },
-  {
-    title: '武功山穿越｜云中草原',
-    cover: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&h=200&fit=crop',
-    authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-    authorName: '摄影达人',
-    date: '2026-05-06',
-    views: 856,
-    likes: 56,
-    comments: 15,
-    status: 'approved',
-    statusText: '已发布',
-    statusClass: 'approved'
-  },
-  {
-    title: '九华山祈福一日游',
-    cover: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=200&h=200&fit=crop',
-    authorAvatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop',
-    authorName: '户外爱好者',
-    date: '2026-05-05',
-    views: 432,
-    likes: 28,
-    comments: 8,
-    status: 'approved',
-    statusText: '已发布',
-    statusClass: 'approved'
+const notes = ref<any[]>([])
+
+const loadNotes = async () => {
+  try {
+    const res: any = await noteApi.getList()
+    if (res) {
+      const list = Array.isArray(res) ? res : (res.list || [])
+      notes.value = list
+      pendingNotes.value = list.filter((n: any) => n.status === 'pending').length
+    }
+  } catch (e) {
+    console.error('获取游记列表失败', e)
   }
-])
+}
+
+onMounted(() => {
+  loadNotes()
+})
 
 const comments = ref([
   {

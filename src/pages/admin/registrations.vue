@@ -115,7 +115,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { registrationApi, activityApi } from '@/utils/http'
 
 const selectedActivity = ref('all')
 const filterStatus = ref('all')
@@ -139,49 +140,36 @@ const stats = computed(() => {
 
 const totalCount = computed(() => stats.pending + stats.confirmed + stats.cancelled)
 
-const myActivities = ref([
-  { _id: '1', title: '黄山日出两日游', registrationCount: 18 },
-  { _id: '2', title: '九华山祈福一日游', registrationCount: 12 }
-])
+const myActivities = ref<any[]>([])
 
-const registrations = ref([
-  {
-    name: '李老师',
-    phone: '138****1234',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    department: '计算机学院',
-    count: 2,
-    activityTitle: '黄山日出两日游',
-    activityId: '1',
-    registerTime: '2026-05-01 10:30',
-    totalPrice: 598,
-    status: 'pending'
-  },
-  {
-    name: '王老师',
-    phone: '139****5678',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-    department: '数学学院',
-    count: 1,
-    activityTitle: '黄山日出两日游',
-    activityId: '1',
-    registerTime: '2026-05-01 09:15',
-    totalPrice: 299,
-    status: 'confirmed'
-  },
-  {
-    name: '陈老师',
-    phone: '137****9012',
-    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop',
-    department: '物理学院',
-    count: 3,
-    activityTitle: '九华山祈福一日游',
-    activityId: '2',
-    registerTime: '2026-04-30 16:45',
-    totalPrice: 504,
-    status: 'pending'
+const registrations = ref<any[]>([])
+
+const loadMyActivities = async () => {
+  try {
+    const res: any = await activityApi.getList()
+    if (res) {
+      myActivities.value = Array.isArray(res) ? res : (res.list || [])
+    }
+  } catch (e) {
+    console.error('获取活动列表失败', e)
   }
-])
+}
+
+const loadRegistrations = async () => {
+  try {
+    const res: any = await registrationApi.getList()
+    if (res) {
+      registrations.value = Array.isArray(res) ? res : (res.list || [])
+    }
+  } catch (e) {
+    console.error('获取报名列表失败', e)
+  }
+}
+
+onMounted(() => {
+  loadMyActivities()
+  loadRegistrations()
+})
 
 const filteredRegistrations = computed(() => {
   let result = registrations.value

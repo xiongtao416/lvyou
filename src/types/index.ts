@@ -1,51 +1,39 @@
 /**
  * 项目TypeScript类型定义
  * 统一管理所有接口和类型
+ * 字段名与Mock数据和页面模板保持一致
  */
 
 // ==================== 活动相关 ====================
 
-/** 活动基本信息 */
+/** 活动详情（detail页使用） */
 export interface Activity {
-  id: string
+  _id: string
+  images: string[]
+  tags: string[]
   title: string
-  cover: string
-  date: string
+  startDate: string
   location: string
-  participants: number
-  views: number
   price: number
-  maxParticipants: number
+  organizer: { avatarUrl: string; nickName: string }
+  meetingPoint: string
+  participantCount: number
+  participants: { avatar: string; name: string }[]
   description: string
-  status: ActivityStatus
-  statusText: string
-  statusClass: string
-  coverImages?: string[]
-  itinerary?: ItineraryDay[]
-  highlights?: string[]
-  tips?: string[]
-  scheduledDate?: string
-  saveTime?: string
+  itinerary: ItineraryDay[]
+  feeInclude: string[]
+  feeExclude: string[]
+  notices: { title: string; content: string }[]
 }
 
 /** 活动状态 */
 export type ActivityStatus = 'registering' | 'full' | 'ongoing' | 'completed' | 'draft' | 'scheduled'
 
-/** 行程安排-天 */
+/** 行程安排-天（与mock数据结构一致） */
 export interface ItineraryDay {
   title: string
-  date: string
-  items: ItineraryItem[]
-}
-
-/** 行程安排-项 */
-export interface ItineraryItem {
-  time: string
-  title: string
-  description: string
-  image?: string
-  tags?: string[]
-  isHighlight?: boolean
+  expanded: boolean
+  schedule: { time: string; content: string }[]
 }
 
 /** 时间轴项 */
@@ -56,6 +44,19 @@ export interface TimelineItem {
   image?: string
   tags?: string[]
   isHighlight?: boolean
+}
+
+/** 活动列表项（首页卡片使用） */
+export interface ActivityCard {
+  _id: string
+  title: string
+  image: string
+  typeTag: string
+  location: string
+  date: string
+  price: number
+  participantCount: number
+  participants: string[]
 }
 
 /** 活动搜索筛选 */
@@ -100,7 +101,7 @@ export interface LoginResult {
 
 /** 报名信息 */
 export interface Registration {
-  id: string
+  _id: string
   activityId: string
   activityTitle: string
   userId: string
@@ -164,14 +165,29 @@ export interface Comment {
 
 // ==================== 管理统计相关 ====================
 
-/** 统计数据 */
-export interface Statistics {
-  totalActivities: number
-  totalParticipants: number
-  totalRevenue: number
+/** 统计概览 */
+export interface StatisticsOverview {
+  activities: number
+  participants: number
+  views: number
+  revenue: number
   pendingRegistrations: number
-  activeUsers: number
-  pendingNotes: number
+}
+
+/** 用户统计 */
+export interface UserStats {
+  total: number
+  newToday: number
+  active: number
+}
+
+/** 活动排行 */
+export interface ActivityRanking {
+  title: string
+  cover: string
+  participants: number
+  views: number
+  price: number
 }
 
 /** 管理员操作日志 */
@@ -184,6 +200,25 @@ export interface AdminLog {
   adminName: string
   createTime: string
   detail?: string
+}
+
+// ==================== 首页相关 ====================
+
+/** 轮播图 */
+export interface Banner {
+  id: string
+  image: string
+  title: string
+  subtitle: string
+  badge?: string
+}
+
+/** 金刚区导航项 */
+export interface NavItem {
+  label: string
+  icon: string
+  bgColor: string
+  category: string
 }
 
 // ==================== 通用类型 ====================
